@@ -485,21 +485,14 @@
 
     <!-- ============ CONTACTO ============ -->
     <section id="vista-contacto" class="vista">
-      <div class="panel">
+      <div class="panel" style="text-align:center;">
         <h1 class="titulo" style="font-size:1.5rem;">Contacto</h1>
         <div class="subrayado"></div>
-        <div class="contacto-datos">
-          <p><b>📍 Planta:</b> C. del Molino 123, Privadas de Santa Catarina 1er Sector, 66367 Cd. Santa Catarina, N.L.</p>
-          <p><b>📞 Teléfono:</b> (81) 8012 0847</p>
-          <p><b>📱 WhatsApp:</b> (81) 8012 0847</p>
-          <p><b>✉️ Correo:</b> ventas@blockstore.mx</p>
-          <p><b>🕗 Horario:</b> Lunes a Viernes 8:00–18:00 · Sábado 8:00–13:00</p>
-        </div>
-        <h3 style="margin-bottom:12px;color:var(--verde-marco);">Envíanos un mensaje</h3>
-        <div class="campo"><label>Nombre</label><input id="msjNombre"></div>
-        <div class="campo"><label>Teléfono o correo</label><input id="msjContacto"></div>
-        <div class="campo"><label>Mensaje</label><textarea id="msjTexto" rows="3" placeholder="¿En qué podemos ayudarte?"></textarea></div>
-        <button class="btn-naranja" onclick="enviarMensaje()">Enviar mensaje</button>
+        <button class="btn-verde" style="background:#25D366;font-size:1.15rem;padding:18px 34px;border-radius:14px;"
+          onclick="solicitarInformacion()">📱 Solicitar información por WhatsApp</button>
+        <p class="contacto-datos" style="margin:26px 0 6px;">
+          <b>🕗 Horario:</b> Lunes a Viernes 8:00–18:00 · Sábado 8:00–13:00
+        </p>
       </div>
     </section>
 
@@ -1297,13 +1290,9 @@ function nuevaCotizacion(){
 }
 
 /* ================= Contacto ================= */
-function enviarMensaje(){
-  const n = document.getElementById("msjNombre").value.trim();
-  const c = document.getElementById("msjContacto").value.trim();
-  const m = document.getElementById("msjTexto").value.trim();
-  if(!n || !c || !m){ avisar("⚠ Completa todos los campos"); return; }
-  ["msjNombre","msjContacto","msjTexto"].forEach(id => document.getElementById(id).value = "");
-  avisar("✔ Mensaje enviado, te contactaremos pronto");
+function solicitarInformacion(){
+  const texto = "Hola, me gustaría solicitar información sobre block 🧱";
+  window.open(`https://wa.me/${WHATSAPP_NEGOCIO}?text=${encodeURIComponent(texto)}`, "_blank");
 }
 
 /* ================= Inicialización ================= */
