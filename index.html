@@ -283,6 +283,31 @@
     background:var(--azul-doc);color:#fff;display:flex;justify-content:space-between;
     padding:9px 32px;font-weight:700;font-size:.85rem;margin-top:12px;
   }
+
+  /* ===== ORDEN DE ENTREGA (formato interno para la fábrica) ===== */
+  #docOrden{display:none;width:780px;margin:0 auto;background:#f4f5f9;
+    color:var(--azul-doc);font-family:"Segoe UI",Arial,sans-serif;}
+  .od-aviso{
+    background:var(--azul-doc);color:#fff;border-radius:12px;padding:8px 16px;
+    font-size:.85rem;font-weight:700;display:inline-block;margin:6px 0 10px;
+  }
+  .od-fila{display:flex;gap:12px;padding:7px 0;border-bottom:1px solid #dfe3ee;align-items:flex-start;}
+  .od-num{background:var(--azul-doc);color:#fff;border-radius:50%;width:26px;height:26px;
+    flex:0 0 26px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;}
+  .od-tit{font-weight:800;color:var(--azul-doc);font-size:.92rem;letter-spacing:.5px;margin-bottom:2px;}
+  .od-cont{flex:1;font-size:.83rem;line-height:1.55;}
+  .od-check{display:inline-block;width:13px;height:13px;border:2px solid var(--azul-doc);
+    border-radius:3px;margin-right:5px;vertical-align:-2px;text-align:center;
+    line-height:11px;font-size:10px;font-weight:800;color:var(--azul-doc);}
+  .od-opcion{margin-right:14px;white-space:nowrap;}
+  .od-linea{display:inline-block;border-bottom:1.5px solid var(--azul-doc);
+    min-width:200px;padding:0 6px;font-weight:700;}
+  .od-caja{border:2px solid var(--azul-doc);border-radius:12px;padding:10px 14px;flex:1;}
+  .od-caja h5{font-size:.85rem;letter-spacing:1px;margin-bottom:6px;color:var(--azul-doc);}
+  table.od-total{width:100%;border-collapse:collapse;font-size:.85rem;}
+  table.od-total td{padding:4px 6px;border-bottom:1px solid #dfe3ee;}
+  table.od-total td:last-child{text-align:right;font-weight:800;}
+  table.od-total tr.tot td{background:var(--azul-doc);color:#fff;font-weight:800;}
 </style>
 </head>
 <body>
@@ -507,8 +532,9 @@
 
 <div class="toast" id="toast">✔</div>
 
-<!-- Documento oculto que se convierte en PDF -->
+<!-- Documentos ocultos que se convierten en PDF -->
 <div id="docCotizacion"></div>
+<div id="docOrden"></div>
 
 <script>
 /* ================================================================
@@ -1118,6 +1144,7 @@ function pintarResumen(){
       <button class="btn-verde" onclick="mostrarVista('cotizador')">‹ Ajustar cotización</button>
       <button class="btn-verde" style="background:#25D366;" onclick="enviarWhatsApp()">📱 Enviar petición por WhatsApp</button>
       <button class="btn-naranja" onclick="descargarPDF()">⬇ Descargar PDF</button>
+      <button class="btn-verde" style="background:var(--azul-doc);" onclick="descargarOrden()">📋 Orden de entrega (PDF)</button>
       <button class="btn-verde" onclick="nuevaCotizacion()">Nueva cotización</button>
     </div>`;
 }
@@ -1232,16 +1259,13 @@ function construirDocumento(){
     </div>`;
 }
 
-async function descargarPDF(){
-  if(!cotizacionFinal) return;
-  construirDocumento();
-  const el = document.getElementById("docCotizacion");
+/* Generador compartido: captura un documento oculto y lo baja como PDF de 1 hoja */
+async function generarPDFDesde(el, nombreArchivo){
   if(typeof html2pdf === "undefined"){
     avisar("⚠ No cargó el generador de PDF — revisa tu internet. Se abrirá para imprimir.");
     window.print();
     return;
   }
-
   /* El documento se muestra en flujo normal (cubierto por un overlay)
      mientras html2pdf lo captura; oculto con display:none no se puede medir */
   const overlay = document.createElement("div");
@@ -1258,7 +1282,7 @@ async function descargarPDF(){
     const formato = altoMm <= 297 ? "a4" : [210, altoMm];
     await html2pdf().set({
       margin: 0,
-      filename: `Cotizacion-${cotizacionFinal.folio}.pdf`,
+      filename: nombreArchivo,
       image: {type:"jpeg", quality:0.95},
       html2canvas: {scale:2, useCORS:true, scrollY:0, scrollX:0, backgroundColor:"#f4f5f9"},
       jsPDF: {unit:"mm", format: formato, orientation:"portrait"}
@@ -1271,6 +1295,132 @@ async function descargarPDF(){
     el.style.display = "none";
     overlay.remove();
   }
+}
+
+async function descargarPDF(){
+  if(!cotizacionFinal) return;
+  construirDocumento();
+  await generarPDFDesde(document.getElementById("docCotizacion"),
+    `Cotizacion-${cotizacionFinal.folio}.pdf`);
+}
+
+async function descargarOrden(){
+  if(!cotizacionFinal) return;
+  construirOrden();
+  await generarPDFDesde(document.getElementById("docOrden"),
+    `OrdenEntrega-${cotizacionFinal.folio}.pdf`);
+}
+
+/* ============ ORDEN DE ENTREGA (formato interno para la fábrica) ============ */
+function construirOrden(){
+  const c = cotizacionFinal;
+  const chk = m => `<span class="od-check">${m ? "✔" : "&nbsp;"}</span>`;
+  const linea = (txt, ancho=200) =>
+    `<span class="od-linea" style="min-width:${ancho}px;">${txt || "&nbsp;"}</span>`;
+
+  const esSabado = (c.fechaEntrega || "").toLowerCase().startsWith("sábado");
+  const esTemprano = (c.horario || "").startsWith("7");
+  const domicilio = c.tipoEntrega === "domicilio";
+
+  const observaciones = [
+    `Folio ${c.folio}`,
+    c.urgente ? "PEDIDO URGENTE" : null,
+    c.factura ? "Requiere factura" : null,
+    domicilio ? null : "OCURRE: el cliente recoge en planta"
+  ].filter(Boolean).join(" · ");
+
+  document.getElementById("docOrden").innerHTML = `
+    <div class="doc-int">
+      <div class="doc-cab">
+        <div>
+          <h1>ORDEN DE<br>ENTREGA</h1>
+          <div class="doc-linea"></div>
+          <div style="font-size:.9rem;font-weight:700;">Solicitud de agendar envío</div>
+          <div class="od-aviso">🧱 Pedido colocado por BLOCKSTORE MONTERREY</div>
+          <div style="font-size:.8rem;">Folio: <b>${c.folio}</b> · Emitida: <b>${c.fechaEmision.toLocaleDateString("es-MX")}</b></div>
+        </div>
+        <div class="doc-svg">${imgProducto(c.producto.clave, c.producto.huecos, 170)}</div>
+      </div>
+
+      <div class="od-fila"><div class="od-num">1</div><div class="od-cont">
+        <div class="od-tit">👤 DATOS DEL CLIENTE</div>
+        Nombre completo: ${linea(c.nombre, 280)} &nbsp; Teléfono: ${linea(c.telefono, 160)}
+      </div></div>
+
+      <div class="od-fila"><div class="od-num">2</div><div class="od-cont">
+        <div class="od-tit">📞 ¿QUIÉN VA A RECIBIR?</div>
+        Nombre y teléfono de la persona que estará en el lugar de entrega.<br>
+        Nombre: ${linea("", 280)} &nbsp; Teléfono: ${linea("", 160)}
+      </div></div>
+
+      <div class="od-fila"><div class="od-num">3</div><div class="od-cont">
+        <div class="od-tit">🧱 TIPO DE BLOCK</div>
+        <span class="od-opcion">${chk(c.producto.clave === "b5")} Block #5 (2H)</span>
+        <span class="od-opcion">${chk(c.producto.clave === "b6-2h")} Block #6 (2H)</span>
+        <span class="od-opcion">${chk(c.producto.clave === "b6-3h")} Block #6 (3H)</span>
+        <span class="od-opcion">${chk(c.producto.clave === "b8")} Block #8 (2H)</span>
+      </div></div>
+
+      <div class="od-fila"><div class="od-num">4</div><div class="od-cont">
+        <div class="od-tit">📦 CANTIDAD DE BLOCKS</div>
+        Cantidad total de piezas: ${linea(fmtEntero(c.cantidad) + " piezas", 200)}
+      </div></div>
+
+      <div class="od-fila"><div class="od-num">5</div><div class="od-cont">
+        <div class="od-tit">📍 DIRECCIÓN EXACTA DE ENTREGA</div>
+        Dirección completa: ${linea(domicilio ? c.direccion : "OCURRE — recoger en planta: " + BASE.direccion, 440)}<br>
+        Referencias claras para ubicar el lugar: ${linea("", 330)}
+      </div></div>
+
+      <div class="od-fila"><div class="od-num">6</div><div class="od-cont">
+        <div class="od-tit">📷 FOTO DEL LUGAR DE DESCARGA</div>
+        Adjuntar o enviar foto del lugar donde se descargará el material (acceso, espacio, entradas, etc.).
+      </div></div>
+
+      <div class="od-fila"><div class="od-num">7</div><div class="od-cont">
+        <div class="od-tit">📄 TIPO DE PRECIO SOLICITADO</div>
+        <span class="od-opcion">${chk(!c.factura)} Remisionado</span>
+        <span class="od-opcion">${chk(c.factura)} Facturado (+ IVA)</span>
+      </div></div>
+
+      <div class="od-fila" style="border-bottom:none;"><div class="od-num">8</div><div class="od-cont">
+        <div class="od-tit">📅 FECHA Y HORA DE ENTREGA</div>
+        Entregas con al menos ${DIAS_ANTICIPACION} días de anticipación. <b>Urgencias:</b> coordinar con nosotros.<br>
+        Fecha solicitada: ${linea(c.fechaEntrega, 280)}<br>
+        <b>Lunes a viernes:</b>
+        <span class="od-opcion">${chk(!esSabado && esTemprano)} Temprano (7:00 am - 12:00 pm)</span>
+        <span class="od-opcion">${chk(!esSabado && !esTemprano)} Tarde (12:00 pm - 6:00 pm)</span><br>
+        <b>Sábados:</b>
+        <span class="od-opcion">${chk(esSabado && esTemprano)} Temprano (7:00 am - 12:00 pm)</span>
+        <span class="od-opcion">${chk(esSabado && !esTemprano)} Tarde (12:00 pm - 6:00 pm)</span>
+      </div></div>
+
+      <div style="display:flex;gap:14px;margin-top:12px;align-items:stretch;">
+        <div class="od-caja">
+          <h5>🏷 PARA USO INTERNO (PROVEEDOR)</h5>
+          <div style="font-size:.83rem;line-height:1.9;">
+            Zona correspondiente: ${linea(c.zonaNombre, 200)}<br>
+            Distancia en km: ${linea(c.km !== null ? c.km + " km" : "N/A", 200)}<br>
+            Observaciones: ${linea(observaciones, 260)}
+          </div>
+        </div>
+        <div class="od-caja" style="max-width:290px;">
+          <h5>💲 PRECIO Y TOTAL</h5>
+          <table class="od-total">
+            <tr><td>Precio por pieza:</td><td>${fmt(c.pu)}${c.factura ? " + IVA" : ""}</td></tr>
+            <tr><td>Cantidad de piezas:</td><td>${fmtEntero(c.cantidad)}</td></tr>
+            ${c.cargoUrgente ? `<tr><td>Cargo urgente:</td><td>${fmt(c.cargoUrgente)}</td></tr>` : ""}
+            <tr><td>Subtotal:</td><td>${fmt(c.subtotal)}</td></tr>
+            <tr><td>IVA (16%):</td><td>${fmt(c.iva)}</td></tr>
+            <tr class="tot"><td>TOTAL:</td><td>${fmt(c.total)}</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="doc-pie">
+      <span>Gracias por proporcionarnos todos los datos.</span>
+      <span>BLOCKSTORE MONTERREY · 📱 ${WHATSAPP_NEGOCIO.slice(2)}</span>
+    </div>`;
 }
 
 function nuevaCotizacion(){
