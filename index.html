@@ -801,6 +801,10 @@ const KM_MAXIMO = 70;
 
 const DIAS_ANTICIPACION = 2;
 const TARIFA_URGENTE = 350.00;   /* ⚠ EDITAR: cargo extra por pedido urgente */
+/* OSRM elige la ruta de menor distancia y suele quedar ~10% por debajo de la
+   ruta más corta de Google Maps; este factor corrige el cálculo para no
+   subestimar la zona (calibrado con C.del Molino 123 → Lyon 5100: 26.4→29 km). */
+const FACTOR_DISTANCIA = 1.10;   /* ⚠ EDITAR si se recalibra con más direcciones */
 const HORARIOS = ["7:00 am - 12:00 pm", "12:00 pm - 6:00 pm"];
 
 /* WhatsApp del negocio: recibe las peticiones de cotización de los clientes */
@@ -1147,7 +1151,7 @@ async function calcularDistanciaYZona(){
     const ruta = await (await fetch(
       `https://router.project-osrm.org/route/v1/driving/${BASE.lon},${BASE.lat};${destino.lon},${destino.lat}?overview=false`)).json();
     if(ruta.code !== "Ok") throw new Error();
-    km = ruta.routes[0].distance / 1000;
+    km = (ruta.routes[0].distance / 1000) * FACTOR_DISTANCIA;
   }catch(e){
     km = haversineKm(BASE.lat, BASE.lon, destino.lat, destino.lon) * 1.3;
   }
