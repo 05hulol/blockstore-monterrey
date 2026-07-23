@@ -508,6 +508,61 @@
   table.od-total td{padding:4px 6px;border-bottom:1px solid #dfe3ee;}
   table.od-total td:last-child{text-align:right;font-weight:800;}
   table.od-total tr.tot td{background:var(--azul-doc);color:#fff;font-weight:800;}
+
+  /* ================================================================
+     FICHA TÉCNICA (Block #6) — documento visible + PDF
+     ================================================================ */
+  :root{ --ft-dark:#141a24; --ft-orange:#e0910c; --ft-border:#d9dee5; --ft-secbg:#eef1f4; }
+  #docFicha6,#docPruebas{display:none;width:820px;margin:0 auto;background:#fff;
+    font-family:"Segoe UI",Arial,sans-serif;color:var(--ft-dark);}
+  .visor-doc{background:#fff;border:1px solid var(--outline-variant);
+    box-shadow:0 4px 0 rgba(0,0,0,.05);max-width:840px;margin:0 auto 16px;overflow-x:auto;}
+  .ft{padding:26px 30px 12px;color:var(--ft-dark);}
+  .ft-over{font-size:.72rem;font-weight:800;letter-spacing:.16em;color:#5a6270;}
+  .ft-title{font-size:2rem;font-weight:800;line-height:1.1;margin:2px 0 8px;color:var(--ft-dark);}
+  .ft-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;}
+  .ft-head-left{flex:1;min-width:0;}
+  .ft-sub{font-size:.86rem;line-height:1.5;color:#3f4753;max-width:560px;}
+  .ft-prod{width:250px;flex:0 0 250px;background:var(--ft-dark);color:#fff;border-radius:4px;overflow:hidden;}
+  .ft-prod-tab{background:var(--ft-orange);color:#fff;font-weight:800;font-size:.72rem;
+    letter-spacing:.12em;padding:6px 14px;}
+  .ft-prod-body{padding:12px 14px;}
+  .ft-prod-name{font-weight:800;font-size:1.05rem;margin-bottom:6px;}
+  .ft-prod-line{font-size:.75rem;color:#c3cad6;line-height:1.5;}
+  .ft-stats{display:flex;gap:14px;margin:20px 0 6px;flex-wrap:wrap;}
+  .ft-stat{flex:1;min-width:180px;border:1px solid var(--ft-border);border-radius:6px;padding:16px 18px;text-align:center;}
+  .ft-stat .v{font-size:1.5rem;font-weight:800;color:var(--ft-dark);}
+  .ft-stat .l{font-size:.74rem;color:#5a6270;margin-top:4px;line-height:1.35;}
+  .ft-cols{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;}
+  .ft-cols > div{flex:1;min-width:250px;}
+  .ft-sec{background:var(--ft-secbg);border-left:4px solid var(--ft-orange);
+    font-weight:800;font-size:.8rem;letter-spacing:.06em;color:var(--ft-dark);
+    padding:8px 12px;margin:14px 0 8px;border-radius:0 4px 4px 0;}
+  .ft p{font-size:.82rem;line-height:1.6;color:#3f4753;}
+  table.ft-tabla{width:100%;border-collapse:collapse;font-size:.8rem;}
+  table.ft-tabla th{background:var(--ft-dark);color:#fff;text-align:left;padding:8px 12px;font-size:.74rem;letter-spacing:.04em;}
+  table.ft-tabla td{padding:8px 12px;border-bottom:1px solid #e6eaef;color:#3f4753;}
+  table.ft-tabla td:first-child{font-weight:600;color:var(--ft-dark);}
+  table.ft-ensayos{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:6px;}
+  table.ft-ensayos th{background:var(--ft-dark);color:#fff;text-align:left;padding:8px 12px;font-size:.74rem;}
+  table.ft-ensayos td{padding:8px 12px;border-bottom:1px solid #e6eaef;color:#3f4753;}
+  .ft-decl{border:1px solid var(--ft-orange);border-radius:4px;overflow:hidden;margin:18px 0 6px;background:#fdf7ea;}
+  .ft-decl-tab{background:var(--ft-orange);color:#fff;font-weight:800;font-size:.74rem;letter-spacing:.1em;padding:6px 14px;}
+  .ft-decl-body{padding:12px 14px;font-size:.82rem;line-height:1.6;color:#3f4753;}
+
+  /* ===== PRUEBAS DE RESISTENCIA (reporte de laboratorio) ===== */
+  :root{ --pr-head:#c3d4e8; --pr-title:#b3c8e2; --pr-border:#9fb4cd; }
+  .pr{padding:24px 26px 12px;color:#1a2432;font-family:"Segoe UI",Arial,sans-serif;}
+  .pr-fecha{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:12px;font-size:.82rem;font-weight:700;}
+  .pr-fecha .caja{border:1px solid var(--pr-border);background:#eef3f9;padding:4px 14px;}
+  table.pr-tabla{width:100%;border-collapse:collapse;font-size:.76rem;margin-bottom:14px;}
+  table.pr-tabla th,table.pr-tabla td{border:1px solid var(--pr-border);padding:5px 6px;text-align:center;}
+  table.pr-tabla .titulo{background:var(--pr-title);font-weight:800;letter-spacing:.04em;font-size:.8rem;}
+  table.pr-tabla .subtitulo{background:var(--pr-head);font-weight:700;}
+  table.pr-tabla thead th{background:var(--pr-head);font-weight:700;}
+  table.pr-tabla td{background:#fff;color:#243141;}
+  .pr-notas{border:1px solid var(--pr-border);padding:12px 16px;font-size:.72rem;line-height:1.6;text-align:center;color:#33465c;background:#f7fafd;}
+  .pr-notas b{display:block;margin-top:6px;color:#1a2432;}
 </style>
 </head>
 <body>
@@ -518,7 +573,6 @@
       <div class="nombre">BLOCK<span>STORE</span> Monterrey</div>
       <div class="lema">Tu asistente de compra</div>
     </div>
-    <button class="btn-fichas" onclick="mostrarVista('fichas')">📄 Fichas técnicas</button>
   </header>
 
   <div class="pasos" id="barraPasos">
@@ -726,15 +780,24 @@
       <h1 class="titulo" style="font-size:clamp(1.4rem,3vw,1.9rem);letter-spacing:.06em;color:var(--primary);">Fichas técnicas y pruebas de resistencia</h1>
       <div class="subrayado"></div>
       <p class="intro">Consulta la documentación técnica de nuestros productos.</p>
-      <div class="grid-fichas">
+
+      <div style="max-width:840px;margin:26px auto 8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <h3 style="color:var(--primary);font-size:1.05rem;letter-spacing:.04em;">📄 Ficha técnica — Block #6</h3>
+        <button class="btn-naranja" style="padding:12px 22px;font-size:.8rem;" onclick="descargarFicha6()">⬇ Descargar PDF</button>
+      </div>
+      <div class="visor-doc" id="visorFicha6"></div>
+
+      <div style="max-width:840px;margin:34px auto 8px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+        <h3 style="color:var(--primary);font-size:1.05rem;letter-spacing:.04em;">🧪 Pruebas de resistencia — Block #6</h3>
+        <button class="btn-naranja" style="padding:12px 22px;font-size:.8rem;" onclick="descargarPruebas()">⬇ Descargar PDF</button>
+      </div>
+      <div class="visor-doc" id="visorPruebas"></div>
+
+      <div class="grid-fichas" style="max-width:840px;margin:34px auto 0;grid-template-columns:1fr 1fr;">
         <div class="ficha-doc"><div class="icono">📄</div><h4>Ficha técnica Block #5</h4>
-          <p>Especificaciones completas del producto.</p><span class="pendiente">Documento próximamente</span></div>
-        <div class="ficha-doc"><div class="icono">📄</div><h4>Ficha técnica Block #6</h4>
           <p>Especificaciones completas del producto.</p><span class="pendiente">Documento próximamente</span></div>
         <div class="ficha-doc"><div class="icono">📄</div><h4>Ficha técnica Block #8</h4>
           <p>Especificaciones completas del producto.</p><span class="pendiente">Documento próximamente</span></div>
-        <div class="ficha-doc"><div class="icono">🧪</div><h4>Pruebas de resistencia</h4>
-          <p>Resultados de laboratorio y certificaciones.</p><span class="pendiente">Documento próximamente</span></div>
       </div>
     </section>
 
@@ -778,6 +841,8 @@
 <!-- Documentos ocultos que se convierten en PDF -->
 <div id="docCotizacion"></div>
 <div id="docOrden"></div>
+<div id="docFicha6"></div>
+<div id="docPruebas"></div>
 
 <script>
 /* ================================================================
@@ -955,6 +1020,7 @@ function mostrarVista(nombre){
     p.classList.toggle("activo", Number(p.dataset.paso) === pasoActivo));
 
   if(nombre === "productos") pintarCatalogo();
+  if(nombre === "fichas") pintarFichas();
   if(nombre === "cotizador" && mapa) setTimeout(() => mapa.invalidateSize(), 150);
   window.scrollTo({top:0, behavior:"smooth"});
 }
@@ -1733,6 +1799,171 @@ function nuevaCotizacion(){
   actualizarMinimoFecha();
   cambioEntrega();
   mostrarVista("productos");
+}
+
+/* ================= Fichas técnicas y pruebas ================= */
+function htmlFicha6(){
+  return `
+    <div class="ft">
+      <div class="ft-head">
+        <div class="ft-head-left">
+          <div class="ft-over">FICHA TÉCNICA</div>
+          <h1 class="ft-title">Block 6" de Concreto</h1>
+          <p class="ft-sub">Pieza hueca de concreto vibrocompactado para mampostería.
+            Diseñada para rendimiento en obra, manejo eficiente y colocación en muros
+            conforme a las especificaciones del proyecto.</p>
+        </div>
+        <div class="ft-prod">
+          <div class="ft-prod-tab">PRODUCTO</div>
+          <div class="ft-prod-body">
+            <div class="ft-prod-name">Block 6" - 3 huecos</div>
+            <div class="ft-prod-line">Clasificación: bloque hueco de concreto</div>
+            <div class="ft-prod-line">Norma: NMX-C-404-ONNCCE-2012</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ft-stats">
+        <div class="ft-stat"><div class="v">70 kg/cm²</div><div class="l">Resistencia a compresión a 28 días</div></div>
+        <div class="ft-stat"><div class="v">15 x 20 x 40 cm</div><div class="l">Dimensión nominal del producto</div></div>
+        <div class="ft-stat"><div class="v">3 huecos</div><div class="l">Configuración de pieza hueca</div></div>
+      </div>
+
+      <div class="ft-cols">
+        <div>
+          <table class="ft-tabla">
+            <tr><th>Concepto</th><th>Especificación</th></tr>
+            <tr><td>Producto</td><td>Block 6" de concreto</td></tr>
+            <tr><td>Configuración</td><td>3 huecos</td></tr>
+            <tr><td>Tipo de pieza</td><td>Pieza hueca de concreto</td></tr>
+            <tr><td>Material</td><td>Concreto vibrocompactado</td></tr>
+            <tr><td>Dimensión nominal</td><td>15 x 20 x 40 cm</td></tr>
+            <tr><td>Dimensión fabricación aprox.</td><td>15 x 19 x 39 cm</td></tr>
+            <tr><td>Resistencia declarada</td><td>70 kg/cm² a 28 días</td></tr>
+            <tr><td>Color / acabado</td><td>Gris natural concreto / rústico</td></tr>
+          </table>
+        </div>
+        <div>
+          <div class="ft-sec">DESCRIPCIÓN GENERAL</div>
+          <p>El Block 6" de 3 huecos es una pieza de mampostería fabricada con cemento,
+            agregados seleccionados y agua. Su geometría hueca ayuda a reducir peso, facilitar
+            la colocación y permitir el paso de refuerzos o instalaciones cuando el proyecto lo requiera.</p>
+          <div class="ft-sec">USOS RECOMENDADOS</div>
+          <p>Muros de mampostería, bardas perimetrales, divisiones interiores o exteriores,
+            cerramientos y obras generales de construcción. Para uso estructural, deberá validarse
+            contra el proyecto, cálculo y especificaciones del responsable de obra.</p>
+        </div>
+      </div>
+
+      <div class="ft-sec">NORMATIVIDAD Y DESEMPEÑO DECLARADO</div>
+      <p>Producto elaborado bajo criterios de la NMX-C-404-ONNCCE-2012, norma mexicana de
+        referencia para bloques, tabiques o ladrillos y tabicones de uso estructural. Para bloque
+        hueco, la norma considera una resistencia media de referencia de 90 kg/cm² y una resistencia
+        mínima individual de 70 kg/cm². La resistencia declarada del producto es 70 kg/cm² a 28 días.</p>
+
+      <table class="ft-ensayos">
+        <tr><th>Ensayo / control</th><th>Norma</th><th>Observación</th></tr>
+        <tr><td>Resistencia a compresión</td><td>NMX-C-036-ONNCCE</td><td>Validación con muestras representativas por lote.</td></tr>
+        <tr><td>Absorción de agua</td><td>NMX-C-037-ONNCCE</td><td>Aplicable si obra, supervisión o cliente lo solicita.</td></tr>
+        <tr><td>Dimensiones</td><td>NMX-C-038-ONNCCE</td><td>Revisión dimensional de la pieza terminada.</td></tr>
+      </table>
+
+      <div class="ft-cols">
+        <div>
+          <div class="ft-sec">RECOMENDACIONES DE MANEJO</div>
+          <p>Almacenar sobre superficie firme, limpia y nivelada. Evitar golpes durante carga,
+            descarga y traslado. No colocar piezas fracturadas o con despostillamiento excesivo.
+            Proteger de lodo, aceites o materiales que afecten la adherencia del mortero.</p>
+        </div>
+        <div>
+          <div class="ft-sec">OBSERVACIONES</div>
+          <p>La resistencia indicada debe respaldarse con certificado o ensayo de laboratorio
+            cuando el cliente, obra o supervisión lo solicite. Esta ficha no sustituye el cálculo
+            estructural ni las especificaciones particulares del proyecto.</p>
+        </div>
+      </div>
+
+      <div class="ft-decl">
+        <div class="ft-decl-tab">DECLARACIÓN TÉCNICA</div>
+        <div class="ft-decl-body">El Block 6" de 3 huecos es una pieza hueca de concreto para
+          mampostería, con resistencia declarada de 70 kg/cm² a 28 días, acorde a criterios de la
+          NMX-C-404-ONNCCE-2012 para bloque hueco de concreto.</div>
+      </div>
+    </div>
+    <div class="doc-pie" style="background:var(--ft-dark);">
+      <span>🧱 BLOCKSTORE MONTERREY</span>
+      <span>Ficha técnica Block #6 · 📱 +52 ${WHATSAPP_NEGOCIO.slice(2)}</span>
+    </div>`;
+}
+
+function htmlPruebas(){
+  return `
+    <div class="pr">
+      <div class="pr-fecha"><span>FECHA:</span><span class="caja">30-abr-26</span></div>
+      <table class="pr-tabla">
+        <tr><td class="titulo" colspan="9">REPORTE DIARIO A 24 HORAS PARA ESTIBAR — REFERENCIA F'C 40</td></tr>
+        <tr><td class="subtitulo" colspan="9">CARACTERÍSTICAS DEL LOTE</td></tr>
+        <thead><tr>
+          <th>ID</th><th>ARENA</th><th>CEMENTO</th><th>TIPO</th><th>DIMENSIONES</th>
+          <th>FECHA DE ELABORACIÓN</th><th>BLK</th><th>TURNO</th><th>F'C</th>
+        </tr></thead>
+        <tr>
+          <td>PB1</td><td>—</td><td>—</td><td>6X3</td><td>15X20X40</td>
+          <td>15-abr-26</td><td>—</td><td>DÍA</td><td>70</td>
+        </tr>
+      </table>
+
+      <table class="pr-tabla">
+        <thead>
+          <tr>
+            <th rowspan="2">EDAD Y FECHA</th><th>ID INTERNO</th><th>BLK</th>
+            <th>ALTURA</th><th>ANCHO</th><th>LARGO</th><th>PESO</th><th>CARGA</th><th>ÁREA</th>
+            <th>RESIST. SOLICITADA</th><th>RESIST. OBTENIDA</th><th rowspan="2">PROMEDIO</th>
+          </tr>
+          <tr>
+            <th></th><th></th>
+            <th>(cm)</th><th>(cm)</th><th>(cm)</th><th>(Kg)</th><th>(Kgf)</th><th>(cm²)</th>
+            <th>(Kg/cm²)</th><th>(Kg/cm²)</th>
+          </tr>
+        </thead>
+        <tr>
+          <td>36 HORAS<br>17-abr-26</td><td>PB1</td><td>6X3</td>
+          <td>19.5</td><td>14.5</td><td>39.5</td><td>13.68</td><td>39,700</td><td>572.75</td>
+          <td>70</td><td>69.3</td><td>99%</td>
+        </tr>
+        <tr>
+          <td>14 DÍAS<br>29-abr-26</td><td>PB1</td><td>6X3</td>
+          <td>19.5</td><td>14.5</td><td>39.5</td><td>13.68</td><td>42,580</td><td>572.75</td>
+          <td>70</td><td>74.3</td><td>106%</td>
+        </tr>
+      </table>
+
+      <div class="pr-notas">
+        El informe de las pruebas se refiere exclusivamente a las muestras probadas. Este informe no
+        puede ser alterado ni reproducido parcial o totalmente sin la autorización por escrito del laboratorio.
+        <b>NORMAS DE REFERENCIA</b>
+        Mexicanas NMX-C-036-ONNCCE-2013, en vigor, método de prueba para determinar la resistencia a
+        compresión en mampostería. * BH / N = bloque hueco de peso normal.
+      </div>
+    </div>
+    <div class="doc-pie" style="background:#1a2432;">
+      <span>🧱 BLOCKSTORE MONTERREY</span>
+      <span>Pruebas de resistencia Block #6 · 📱 +52 ${WHATSAPP_NEGOCIO.slice(2)}</span>
+    </div>`;
+}
+
+function pintarFichas(){
+  document.getElementById("visorFicha6").innerHTML = htmlFicha6();
+  document.getElementById("visorPruebas").innerHTML = htmlPruebas();
+}
+
+async function descargarFicha6(){
+  document.getElementById("docFicha6").innerHTML = htmlFicha6();
+  await generarPDFDesde(document.getElementById("docFicha6"), "FichaTecnica-Block6.pdf");
+}
+async function descargarPruebas(){
+  document.getElementById("docPruebas").innerHTML = htmlPruebas();
+  await generarPDFDesde(document.getElementById("docPruebas"), "PruebasResistencia-Block6.pdf");
 }
 
 /* ================= Contacto ================= */
