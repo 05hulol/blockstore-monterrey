@@ -3,230 +3,430 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BlockStore Monterrey — Tu asistente de compra</title>
+<title>BLOCKSTORE Monterrey — Tu asistente de compra</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --verde-marco:#1E5B34;
-    --verde-oscuro:#154226;
-    --verde-medio:#2E7D46;
-    --verde-pastel:#B7E4C7;
-    --verde-pastel-hover:#95D5B2;
-    --verde-suave:#E9F7EF;
-    --naranja:#F7941E;
-    --tinta:#1B2A38;
-    --azul-doc:#1B2559;          /* azul marino del formato de cotización */
-    --gris:#6b7a86;
-    --blanco:#ffffff;
-    --radio:16px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Arial,Helvetica,sans-serif;}
-  body{background:var(--verde-suave);color:var(--tinta);}
+    /* Sistema de diseño (Stitch — Modern Block Store Monterrey) */
+    --primary:#012d1d;
+    --primary-container:#1b4332;
+    --on-primary:#ffffff;
+    --on-primary-container:#86af99;
+    --primary-fixed:#c1ecd4;
+    --primary-fixed-dim:#a5d0b9;
+    --secondary:#934b00;
+    --secondary-container:#fd8603;
+    --secondary-fixed:#ffdcc4;
+    --background:#f6faff;
+    --surface:#ffffff;
+    --surface-low:#ecf5fe;
+    --surface-container:#e6eff8;
+    --surface-high:#e0e9f2;
+    --surface-variant:#dbe4ed;
+    --outline:#717973;
+    --outline-variant:#c1c8c2;
+    --on-background:#141d23;
+    --on-surface-variant:#414844;
 
-  /* ===== Marco verde ===== */
-  .marco{min-height:100vh;border:14px solid var(--verde-marco);display:flex;flex-direction:column;}
+    /* Alias heredados (los usan plantillas del script y el formato PDF) */
+    --verde-marco:var(--primary-container);
+    --verde-oscuro:var(--primary);
+    --verde-medio:#3f6653;
+    --verde-pastel:var(--primary-fixed);
+    --verde-pastel-hover:var(--primary-fixed-dim);
+    --verde-suave:var(--surface-low);
+    --naranja:var(--secondary-container);
+    --tinta:var(--on-background);
+    --azul-doc:#1B2559;          /* azul marino del formato de cotización */
+    --gris:var(--on-surface-variant);
+    --blanco:#ffffff;
+    --radio:8px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:"Inter","Segoe UI",Arial,Helvetica,sans-serif;}
+  body{background:var(--background);color:var(--on-background);position:relative;}
+  /* Textura de retícula industrial */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.05;
+    background-image:linear-gradient(to right, var(--outline-variant) 1px, transparent 1px),
+                     linear-gradient(to bottom, var(--outline-variant) 1px, transparent 1px);
+    background-size:40px 40px;
+  }
+  .marco{min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1;}
 
   /* ===== Encabezado ===== */
   header{
-    background:var(--verde-marco);color:var(--blanco);padding:12px 26px;
+    background:var(--primary-container);color:var(--on-primary);padding:14px 5vw;
     display:flex;align-items:center;justify-content:space-between;gap:16px;
+    border-bottom:1px solid var(--outline-variant);position:sticky;top:0;z-index:950;
   }
-  .logo{cursor:pointer;line-height:1.2;}
-  .logo .nombre{font-size:1.35rem;font-weight:700;letter-spacing:2px;}
-  .logo .nombre span{color:var(--verde-pastel);}
-  .logo .lema{font-size:.8rem;color:var(--verde-pastel);letter-spacing:1px;}
+  .logo{cursor:pointer;line-height:1.25;}
+  .logo .nombre{font-size:1.15rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;}
+  .logo .nombre span{color:var(--primary-fixed);}
+  .logo .lema{font-size:.68rem;color:var(--on-primary-container);letter-spacing:2.5px;text-transform:uppercase;}
   .btn-fichas{
-    background:var(--verde-oscuro);border:none;color:var(--blanco);
-    padding:10px 18px;border-radius:12px;font-size:.95rem;cursor:pointer;
+    background:var(--primary);border:1px solid var(--outline-variant);color:var(--on-primary);
+    padding:10px 16px;border-radius:4px;font-size:.78rem;font-weight:700;letter-spacing:.5px;
+    cursor:pointer;text-transform:uppercase;
   }
-  .btn-fichas:hover{background:var(--verde-medio);}
+  .btn-fichas:hover{background:#0a3a28;}
 
-  /* ===== Cintilla del proceso ===== */
+  /* ===== Barra de pasos ===== */
   .pasos{
-    display:flex;justify-content:center;gap:8px;flex-wrap:wrap;
-    background:var(--verde-medio);padding:10px 16px;color:#fff;font-size:.88rem;
+    display:flex;justify-content:center;align-items:flex-start;gap:0;
+    background:var(--background);padding:22px 16px 12px;position:relative;
+    max-width:760px;margin:0 auto;width:100%;
   }
-  .paso{display:flex;align-items:center;gap:6px;opacity:.55;}
-  .paso.activo{opacity:1;font-weight:700;}
-  .paso .num{background:#fff;color:var(--verde-marco);border-radius:50%;
-    width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;}
-  .paso.activo .num{background:var(--naranja);color:#fff;}
-  .flecha{opacity:.6;}
+  .pasos::before{
+    content:"";position:absolute;left:12%;right:12%;top:38px;height:2px;
+    background:var(--outline-variant);z-index:0;
+  }
+  .paso{
+    display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;
+    position:relative;z-index:1;background:var(--background);padding:0 8px;
+    color:var(--outline);font-size:.62rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;text-align:center;
+  }
+  .paso .num{
+    background:var(--surface-variant);color:var(--outline);border:1px solid var(--outline-variant);
+    border-radius:50%;width:32px;height:32px;display:inline-flex;align-items:center;
+    justify-content:center;font-weight:800;font-size:.9rem;
+  }
+  .paso.activo{color:var(--secondary);}
+  .paso.activo .num{background:var(--secondary-container);color:#fff;border-color:var(--secondary-container);}
+  .flecha{display:none;}
 
-  main{flex:1;padding:32px 5vw 140px;}
+  main{flex:1;padding:26px 5vw 90px;max-width:1200px;margin:0 auto;width:100%;}
 
   .vista{display:none;animation:aparecer .25s ease;}
   .vista.visible{display:block;}
   @keyframes aparecer{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
-  h1.titulo{text-align:center;letter-spacing:6px;font-weight:600;font-size:1.9rem;text-transform:uppercase;}
-  .subrayado{width:80px;height:3px;background:var(--naranja);margin:14px auto 22px;}
-  .intro{max-width:900px;margin:0 auto;text-align:center;color:var(--gris);line-height:1.6;}
+  h1.titulo{
+    text-align:center;font-weight:800;font-size:clamp(1.9rem,4.5vw,3rem);
+    text-transform:uppercase;letter-spacing:-0.02em;line-height:1.1;color:var(--on-background);
+  }
+  .subrayado{width:96px;height:4px;background:var(--secondary-container);margin:16px auto 24px;}
+  .intro{max-width:820px;margin:0 auto;text-align:center;color:var(--on-surface-variant);line-height:1.6;font-size:1.05rem;}
 
   /* ===== Inicio ===== */
-  .lema-inicio{text-align:center;color:var(--verde-medio);font-weight:700;font-size:1.1rem;
-    letter-spacing:1px;margin-top:6px;}
-  .hero-img{text-align:center;margin:10px auto 26px;}
-  .hero-img img{max-width:min(860px, 92%);height:auto;}
-  .calidad{max-width:760px;margin:26px auto;background:var(--blanco);border-radius:var(--radio);
-    padding:22px 30px;box-shadow:0 4px 14px rgba(21,66,38,.12);}
-  .calidad h3{color:var(--verde-marco);margin-bottom:10px;}
+  .lema-inicio{text-align:center;color:var(--secondary);font-weight:600;font-size:1.35rem;margin-top:8px;}
+  .hero-img{text-align:center;margin:16px auto 30px;}
+  .hero-img img{max-width:min(860px, 92%);height:auto;filter:drop-shadow(0 16px 18px rgba(0,0,0,.18));}
+  .norma{
+    max-width:820px;margin:22px auto 0;text-align:center;
+    border-top:1px solid var(--outline-variant);border-bottom:1px solid var(--outline-variant);
+    padding:16px 10px;font-size:.9rem;color:var(--on-surface-variant);
+  }
+  .norma b{
+    color:var(--primary);font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    display:inline-block;margin-right:8px;
+  }
+  .bento{
+    display:grid;grid-template-columns:2fr 1fr;gap:24px;max-width:1050px;margin:38px auto 0;
+  }
+  @media(max-width:820px){.bento{grid-template-columns:1fr;}}
+  .calidad{
+    background:var(--primary-container);color:var(--on-primary);border-radius:12px;padding:30px 34px;
+  }
+  .calidad h3{font-size:1.55rem;font-weight:700;margin-bottom:18px;letter-spacing:-0.01em;}
   .calidad ul{list-style:none;}
-  .calidad li{margin:8px 0;padding-left:26px;position:relative;line-height:1.5;font-size:.95rem;}
-  .calidad li::before{content:"✔";position:absolute;left:0;color:var(--verde-medio);font-weight:800;}
-  .titulo-proceso{text-align:center;color:var(--verde-marco);letter-spacing:3px;
-    text-transform:uppercase;margin:34px 0 14px;}
+  .calidad li{margin:14px 0;padding-left:32px;position:relative;line-height:1.55;font-size:.93rem;color:var(--on-primary-container);}
+  .calidad li::before{content:"✔";position:absolute;left:0;top:0;color:var(--secondary-container);font-weight:800;font-size:1.05rem;}
+  .calidad li b{display:block;color:#fff;font-size:.82rem;letter-spacing:.05em;text-transform:uppercase;margin-bottom:3px;}
+  .ayuda-card{
+    background:var(--surface-variant);border-radius:12px;padding:30px 26px;text-align:center;
+    display:flex;flex-direction:column;justify-content:center;align-items:center;
+  }
+  .ayuda-card .icono{
+    width:64px;height:64px;background:var(--primary-fixed);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin-bottom:14px;
+  }
+  .ayuda-card h4{color:var(--primary);font-size:1.3rem;font-weight:600;margin-bottom:8px;}
+  .ayuda-card p{color:var(--on-surface-variant);font-size:.93rem;margin-bottom:18px;line-height:1.55;}
+  .ayuda-card button{
+    width:100%;background:var(--secondary-container);color:#fff;border:none;padding:14px;
+    border-radius:4px;font-weight:700;font-size:.82rem;letter-spacing:.08em;
+    text-transform:uppercase;cursor:pointer;
+  }
+  .ayuda-card button:hover{background:var(--secondary);}
+
+  .titulo-proceso{
+    text-align:center;color:var(--primary);letter-spacing:.12em;font-size:1.5rem;
+    text-transform:uppercase;margin:44px 0 6px;font-weight:700;
+  }
+  .sub-proceso{text-align:center;color:var(--on-surface-variant);font-size:.95rem;margin-bottom:20px;}
   .grid-proceso{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:16px;max-width:1050px;margin:0 auto;}
-  .paso-card{background:var(--blanco);border-radius:var(--radio);padding:18px;text-align:center;
-    box-shadow:0 4px 14px rgba(21,66,38,.12);}
-  .paso-card .n{background:var(--naranja);color:#fff;border-radius:50%;width:34px;height:34px;
+    gap:20px;max-width:1050px;margin:0 auto;}
+  .paso-card{
+    background:var(--surface);border:1px solid var(--outline-variant);border-radius:4px;
+    padding:22px 18px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.05);
+  }
+  .paso-card .n{background:var(--secondary-container);color:#fff;border-radius:50%;width:36px;height:36px;
     display:inline-flex;align-items:center;justify-content:center;font-weight:800;
-    font-size:1.1rem;margin-bottom:8px;}
-  .paso-card h4{margin-bottom:6px;font-size:.95rem;}
-  .paso-card p{color:var(--gris);font-size:.82rem;line-height:1.45;}
+    font-size:1.1rem;margin-bottom:10px;}
+  .paso-card h4{margin-bottom:6px;font-size:.92rem;color:var(--primary);}
+  .paso-card p{color:var(--on-surface-variant);font-size:.82rem;line-height:1.5;}
 
   /* ===== Catálogo ===== */
-  .grid-productos{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:26px;margin-top:34px;}
+  .grid-productos{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:24px;margin-top:36px;}
   .tarjeta{
-    background:var(--blanco);border-radius:var(--radio);padding:22px;
-    box-shadow:0 4px 14px rgba(21,66,38,.12);cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease;
-    border:2px solid transparent;text-align:center;
+    background:var(--surface);border:1px solid var(--outline-variant);border-radius:4px;padding:24px;
+    box-shadow:0 4px 0 rgba(0,0,0,.05);cursor:pointer;text-align:center;
+    display:flex;flex-direction:column;transition:box-shadow .15s ease, border-color .15s ease;
   }
-  .tarjeta:hover{transform:translateY(-4px);box-shadow:0 10px 22px rgba(21,66,38,.2);border-color:var(--verde-pastel);}
-  .tarjeta h3{letter-spacing:3px;font-size:1.2rem;margin:14px 0 8px;}
-  .tarjeta .specs{font-size:.88rem;color:var(--tinta);line-height:1.7;text-align:left;
-    background:var(--verde-suave);border-radius:10px;padding:10px 14px;margin:8px 0;}
-  .tarjeta .specs b{color:var(--verde-marco);}
-  .tarjeta .desde{margin-top:10px;font-size:1.25rem;color:var(--naranja);font-weight:700;}
-  .tarjeta .config{display:inline-block;margin-top:8px;background:var(--verde-suave);
-    color:var(--verde-marco);font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;}
-  .tarjeta svg{width:100%;max-width:230px;height:auto;}
-  .foto-pendiente{font-size:.7rem;color:var(--gris);font-style:italic;}
+  .tarjeta:hover{box-shadow:0 6px 0 rgba(0,0,0,.08);border-color:var(--primary-fixed-dim);}
+  .tarjeta .marco-img{
+    background:var(--surface-variant);border-radius:4px;padding:26px;margin-bottom:20px;
+    display:flex;align-items:center;justify-content:center;overflow:hidden;
+  }
+  .tarjeta .marco-img img,.tarjeta .marco-img svg{transition:transform .4s ease;}
+  .tarjeta:hover .marco-img img,.tarjeta:hover .marco-img svg{transform:scale(1.08);}
+  .tarjeta h3{letter-spacing:1px;font-size:1.35rem;font-weight:600;color:var(--primary);margin-bottom:14px;}
+  .tarjeta .specs{
+    font-size:.88rem;color:var(--on-background);background:var(--surface-low);
+    border-radius:4px;padding:12px 16px;margin-bottom:14px;text-align:left;
+  }
+  .tarjeta .specs .fila{display:flex;justify-content:space-between;align-items:center;padding:3px 0;}
+  .tarjeta .specs b{
+    color:var(--on-surface-variant);font-size:.72rem;letter-spacing:.06em;
+    text-transform:uppercase;font-weight:700;
+  }
+  .tarjeta .config{
+    display:inline-block;margin:0 auto 10px;background:var(--surface-high);
+    color:var(--primary);font-size:.72rem;font-weight:700;padding:5px 14px;border-radius:12px;
+  }
+  .tarjeta .desde{font-size:1.4rem;color:var(--secondary);font-weight:800;}
+  .tarjeta .desde small{display:block;font-size:.72rem;color:var(--on-surface-variant);font-weight:500;margin-top:2px;}
+  .tarjeta .btn-ver{
+    margin-top:16px;width:100%;background:var(--primary);color:var(--on-primary);border:none;
+    padding:16px 10px;border-radius:4px;font-size:.8rem;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;cursor:pointer;transition:transform .12s ease, background .15s ease;
+  }
+  .tarjeta .btn-ver:hover{background:var(--primary-container);transform:scale(1.02);}
+  .tarjeta svg{width:100%;max-width:220px;height:auto;}
 
   /* ===== Detalle ===== */
   .detalle{display:grid;grid-template-columns:1.2fr .8fr;gap:40px;align-items:start;
-    background:var(--blanco);border-radius:var(--radio);padding:36px;
-    box-shadow:0 4px 14px rgba(21,66,38,.12);max-width:1100px;margin:0 auto;}
+    background:var(--surface);border:1px solid var(--outline-variant);border-radius:4px;padding:36px;
+    box-shadow:0 4px 0 rgba(0,0,0,.05);max-width:1100px;margin:0 auto;}
   @media(max-width:820px){.detalle{grid-template-columns:1fr;}}
-  .detalle h2{letter-spacing:5px;font-size:1.7rem;font-weight:600;text-transform:uppercase;}
-  .detalle .descripcion{margin:16px 0;line-height:1.65;color:#333;font-size:.95rem;}
+  .detalle h2{letter-spacing:1px;font-size:1.9rem;font-weight:700;text-transform:uppercase;color:var(--primary);}
+  .detalle .descripcion{margin:16px 0;line-height:1.65;color:var(--on-surface-variant);font-size:.95rem;}
   .ficha p{margin:6px 0;font-size:.95rem;}
-  .ficha b{color:var(--naranja);}
-  .precio{font-size:2.4rem;color:var(--naranja);font-weight:800;margin:18px 0 4px;}
-  .precio small{font-size:1.2rem;font-weight:600;}
-  .nota-zona{color:var(--gris);font-size:.85rem;margin-bottom:6px;}
+  .ficha b{color:var(--secondary);text-transform:uppercase;font-size:.78rem;letter-spacing:.05em;}
+  .precio{font-size:2.4rem;color:var(--secondary);font-weight:800;margin:18px 0 4px;}
+  .precio small{font-size:1.15rem;font-weight:600;}
+  .nota-zona{color:var(--on-surface-variant);font-size:.85rem;margin-bottom:6px;}
   .btn-naranja{
-    background:var(--naranja);color:#fff;border:none;padding:14px 34px;border-radius:8px;
-    font-size:1.1rem;font-weight:800;cursor:pointer;letter-spacing:1px;
+    background:var(--secondary-container);color:#fff;border:none;padding:16px 36px;border-radius:4px;
+    font-size:.95rem;font-weight:800;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;
+    box-shadow:0 4px 0 rgba(0,0,0,.08);transition:transform .12s ease;
   }
-  .btn-naranja:hover{filter:brightness(1.07);}
+  .btn-naranja:hover{background:var(--secondary);}
+  .btn-naranja:active{transform:scale(.97);}
   .btn-naranja:disabled{opacity:.55;cursor:not-allowed;}
-  .volver{background:none;border:none;color:var(--verde-marco);font-weight:700;cursor:pointer;
-    font-size:.95rem;margin-bottom:18px;}
+  .volver{
+    background:none;border:none;color:var(--primary);font-weight:700;cursor:pointer;
+    font-size:.82rem;margin-bottom:18px;letter-spacing:.05em;text-transform:uppercase;
+  }
+  .volver:hover{text-decoration:underline;}
   .img-detalle svg{width:100%;max-width:380px;height:auto;display:block;margin:0 auto;}
+  .img-detalle > div{
+    background:var(--surface-variant);border:1px solid var(--outline-variant);
+    border-radius:4px;padding:18px;
+  }
 
   /* ===== Paneles / formularios ===== */
-  .panel{background:var(--blanco);border-radius:var(--radio);padding:30px;max-width:900px;margin:0 auto;
-    box-shadow:0 4px 14px rgba(21,66,38,.12);}
+  .panel{background:var(--surface);border:1px solid var(--outline-variant);border-radius:4px;
+    padding:32px;box-shadow:0 4px 0 rgba(0,0,0,.05);}
+  .layout-cotizador{
+    display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start;
+    max-width:1200px;margin:0 auto;
+  }
+  @media(max-width:980px){.layout-cotizador{grid-template-columns:1fr;}}
   .campo{margin-bottom:14px;}
-  .campo label{display:block;font-weight:700;font-size:.88rem;margin-bottom:5px;}
-  .campo input,.campo textarea,.campo select{width:100%;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:.95rem;background:#fff;}
-  .seccion-form{color:var(--verde-marco);margin:22px 0 10px;font-size:1.05rem;}
-  .acciones{display:flex;justify-content:space-between;gap:14px;margin-top:24px;flex-wrap:wrap;}
-  .btn-verde{background:var(--verde-marco);color:#fff;border:none;padding:12px 26px;
-    border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;}
-  .btn-verde:hover{background:var(--verde-medio);}
-  .vacio{text-align:center;color:var(--gris);padding:30px 0;}
+  .campo label{
+    display:block;font-weight:700;font-size:.8rem;margin-bottom:6px;letter-spacing:.02em;
+  }
+  .campo input,.campo textarea,.campo select{
+    width:100%;padding:12px 14px;border:1px solid var(--outline);border-radius:0;
+    font-size:.95rem;background:var(--background);color:var(--on-background);
+  }
+  .campo input:focus,.campo select:focus{outline:none;border:2px solid var(--primary-container);padding:11px 13px;}
+  .seccion-form{
+    color:var(--outline);margin:30px 0 14px;font-size:.8rem;font-weight:700;
+    letter-spacing:.14em;text-transform:uppercase;
+  }
+  .seccion-form:first-of-type{margin-top:8px;}
+  .acciones{display:flex;justify-content:space-between;gap:14px;margin-top:26px;flex-wrap:wrap;}
+  .btn-verde{background:var(--primary);color:#fff;border:none;padding:13px 26px;
+    border-radius:4px;font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.06em;
+    text-transform:uppercase;}
+  .btn-verde:hover{background:var(--primary-container);}
+  .vacio{text-align:center;color:var(--on-surface-variant);padding:30px 0;}
 
-  .grupo-radios{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .grupo-radios{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;}
   .radio-caja{
-    flex:1;min-width:210px;border:2px solid #d9e6dd;border-radius:12px;padding:14px 16px;
-    cursor:pointer;display:flex;gap:10px;align-items:flex-start;background:#fbfdfc;
+    flex:1;min-width:220px;border:2px solid var(--outline-variant);border-radius:0;padding:16px 18px;
+    cursor:pointer;display:flex;gap:10px;align-items:flex-start;background:var(--surface-low);
     transition:border-color .15s ease, background .15s ease;
   }
-  .radio-caja:hover{border-color:var(--verde-pastel-hover);}
-  .radio-caja.seleccionada{border-color:var(--verde-marco);background:var(--verde-suave);}
-  .radio-caja input{margin-top:4px;}
-  .radio-caja .titulo-radio{font-weight:800;font-size:.95rem;}
-  .radio-caja .desc-radio{font-size:.8rem;color:var(--gris);margin-top:3px;line-height:1.4;display:block;}
+  .radio-caja:hover{background:var(--surface-high);}
+  .radio-caja.seleccionada{border-color:var(--secondary-container);}
+  .radio-caja input{margin-top:4px;accent-color:var(--secondary-container);}
+  .radio-caja .titulo-radio{font-weight:800;font-size:.88rem;}
+  .radio-caja .desc-radio{font-size:.78rem;color:var(--on-surface-variant);margin-top:4px;line-height:1.5;display:block;}
 
-  .grid-direccion{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;}
+  .grid-direccion{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;}
   @media(max-width:560px){.grid-direccion{grid-template-columns:1fr;}}
 
   .check-caja{
-    display:flex;gap:10px;align-items:flex-start;
-    background:#fff7ec;border:2px solid var(--naranja);border-radius:12px;
-    padding:12px 16px;font-size:.9rem;line-height:1.5;cursor:pointer;margin-bottom:14px;
+    display:flex;gap:12px;align-items:flex-start;
+    background:rgba(255,220,196,.3);border:1px solid var(--secondary-container);border-radius:0;
+    padding:14px 16px;font-size:.85rem;line-height:1.5;cursor:pointer;margin-bottom:14px;
   }
-  .check-caja input{margin-top:3px;transform:scale(1.2);}
-  .check-caja.verde{background:var(--verde-suave);border-color:var(--verde-medio);}
-  #inpFecha{width:100%;max-width:280px;padding:10px;border:1px solid #ccc;border-radius:8px;font-size:.95rem;}
+  .check-caja input{margin-top:3px;transform:scale(1.2);accent-color:var(--secondary-container);}
+  .check-caja.verde{background:var(--surface-low);border-color:var(--outline-variant);}
+  .check-caja.verde:hover{border-color:var(--secondary-container);}
+  #inpFecha{width:100%;max-width:280px;padding:12px 14px;border:1px solid var(--outline);border-radius:0;font-size:.95rem;background:var(--background);}
 
   .leyenda-min{
-    background:var(--verde-suave);border-left:4px solid var(--verde-medio);
-    padding:8px 12px;border-radius:6px;font-size:.83rem;color:var(--verde-oscuro);margin:6px 0 14px;
+    background:var(--primary-fixed);color:var(--primary);
+    padding:8px 12px;font-size:.75rem;font-weight:700;margin:6px 0 14px;
+    letter-spacing:.02em;display:inline-block;
   }
 
   /* Mapa */
-  #mapa{height:320px;border-radius:12px;display:none;margin:14px 0;border:2px solid var(--verde-pastel);}
-  .nota-mapa{font-size:.8rem;color:var(--gris);margin:-8px 0 14px;}
+  #mapa{height:320px;border-radius:0;display:none;margin:14px 0;border:2px solid var(--outline-variant);}
+  .nota-mapa{font-size:.8rem;color:var(--on-surface-variant);margin:-8px 0 14px;}
 
   .resultado-zona{
-    border:2px dashed var(--verde-medio);border-radius:12px;padding:16px 20px;margin:16px 0;
-    background:var(--verde-suave);font-size:.95rem;line-height:1.7;
+    border:2px dashed var(--primary-container);border-radius:0;padding:16px 20px;margin:16px 0;
+    background:var(--surface-low);font-size:.92rem;line-height:1.7;
   }
-  .resultado-zona.error{border-color:#c0392b;background:#fdf0ee;color:#7c2d22;}
-  .resultado-zona b{color:var(--verde-marco);}
-  .resultado-zona.error b{color:#c0392b;}
+  .resultado-zona.error{border-color:#ba1a1a;background:#ffdad6;color:#93000a;}
+  .resultado-zona b{color:var(--primary);}
+  .resultado-zona.error b{color:#ba1a1a;}
   .cargando{display:inline-block;animation:girar 1s linear infinite;}
   @keyframes girar{to{transform:rotate(360deg);}}
 
-  /* ===== Resumen ===== */
+  /* ===== Resumen lateral (estimación en vivo) ===== */
+  .aside-cotizador{position:sticky;top:96px;}
+  @media(max-width:980px){.aside-cotizador{position:static;}}
+  .card-estimacion{
+    background:var(--primary);color:var(--on-primary);padding:30px;
+    border:4px solid var(--primary);box-shadow:0 4px 0 rgba(0,0,0,.08);
+    position:relative;overflow:hidden;
+  }
+  .card-estimacion::after{
+    content:"🧱";position:absolute;right:-14px;bottom:-24px;font-size:7rem;opacity:.08;
+  }
+  .card-estimacion h3{
+    font-size:1.15rem;font-weight:600;margin-bottom:18px;
+    border-bottom:1px solid rgba(165,208,185,.3);padding-bottom:14px;letter-spacing:.02em;
+  }
+  .card-estimacion .fila-est{
+    display:flex;justify-content:space-between;align-items:center;
+    font-size:.9rem;opacity:.85;margin:10px 0;gap:10px;
+  }
+  .card-estimacion .fila-est .verde{color:var(--primary-fixed);font-weight:700;}
+  .card-estimacion .total-est{
+    border-top:1px solid rgba(165,208,185,.3);margin-top:16px;padding-top:14px;
+  }
+  .card-estimacion .total-est .eti{font-size:.72rem;font-weight:700;letter-spacing:.1em;opacity:.6;text-transform:uppercase;}
+  .card-estimacion .total-est .monto{font-size:2.1rem;font-weight:800;color:var(--primary-fixed);letter-spacing:-0.02em;}
+  .card-estimacion .total-est .mxn{font-size:.75rem;opacity:.6;margin-left:6px;}
+  .card-estimacion .nota-est{font-size:.68rem;font-style:italic;opacity:.6;display:block;margin-top:4px;}
+  .card-estimacion .btn-cotizar-ahora{
+    width:100%;margin-top:20px;background:var(--secondary-container);color:#fff;border:none;
+    padding:18px 10px;font-size:1.15rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+    cursor:pointer;box-shadow:0 5px 14px rgba(0,0,0,.3);transition:transform .12s ease, background .15s ease;
+    position:relative;z-index:1;
+  }
+  .card-estimacion .btn-cotizar-ahora:hover{background:var(--secondary);}
+  .card-estimacion .btn-cotizar-ahora:active{transform:scale(.96);}
+  .card-estimacion .confianza{margin-top:18px;display:flex;flex-direction:column;gap:9px;}
+  .card-estimacion .confianza span{font-size:.74rem;font-weight:700;opacity:.85;letter-spacing:.02em;}
+  .card-ayuda-mini{
+    margin-top:22px;background:var(--surface-container);border:1px solid var(--outline-variant);
+    padding:18px 20px;display:flex;align-items:center;gap:14px;
+  }
+  .card-ayuda-mini .circ{
+    background:var(--primary-container);color:var(--on-primary-container);border-radius:50%;
+    width:44px;height:44px;flex:0 0 44px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;
+  }
+  .card-ayuda-mini b{display:block;font-size:.8rem;letter-spacing:.02em;}
+  .card-ayuda-mini small{font-size:.85rem;color:var(--on-surface-variant);}
+  .card-ayuda-mini small strong{color:var(--primary);}
+
+  /* ===== Resumen final ===== */
   table.resumen{width:100%;border-collapse:collapse;margin-top:16px;}
-  table.resumen th{background:var(--verde-suave);color:var(--verde-marco);text-align:left;padding:10px;font-size:.85rem;}
-  table.resumen td{padding:12px 10px;border-bottom:1px solid #eee;font-size:.92rem;}
+  table.resumen th{
+    background:var(--primary-container);color:var(--on-primary);text-align:left;padding:11px 10px;
+    font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  }
+  table.resumen td{padding:13px 10px;border-bottom:1px solid var(--outline-variant);font-size:.92rem;background:var(--surface);}
   .total-linea{text-align:right;font-size:1.3rem;margin-top:18px;}
-  .total-linea b{color:var(--naranja);font-size:1.6rem;}
-  .nota-iva{text-align:right;color:var(--gris);font-size:.8rem;}
+  .total-linea b{color:var(--secondary);font-size:1.7rem;font-weight:800;}
+  .nota-iva{text-align:right;color:var(--on-surface-variant);font-size:.8rem;}
 
   /* ===== Fichas técnicas ===== */
-  .grid-fichas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:24px;}
+  .grid-fichas{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:20px;margin-top:28px;}
   .ficha-doc{
-    background:var(--blanco);border-radius:var(--radio);padding:24px;text-align:center;
-    box-shadow:0 4px 14px rgba(21,66,38,.12);color:var(--gris);
+    background:var(--surface);border:1px solid var(--outline-variant);border-radius:4px;
+    padding:26px;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.05);color:var(--on-surface-variant);
   }
   .ficha-doc .icono{font-size:2.6rem;}
-  .ficha-doc h4{color:var(--tinta);margin:10px 0 6px;}
-  .ficha-doc .pendiente{display:inline-block;margin-top:10px;background:#fff3e0;color:#a05c00;
-    font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:20px;}
+  .ficha-doc h4{color:var(--primary);margin:12px 0 6px;}
+  .ficha-doc .pendiente{display:inline-block;margin-top:12px;background:var(--secondary-fixed);color:#5f2f00;
+    font-size:.7rem;font-weight:700;padding:5px 14px;border-radius:12px;letter-spacing:.05em;text-transform:uppercase;}
 
   /* ===== Contacto ===== */
   .contacto-datos{margin:18px 0 26px;line-height:1.9;font-size:.98rem;}
-  .contacto-datos b{color:var(--verde-marco);}
+  .contacto-datos b{color:var(--primary);}
+  .btn-whats{
+    background:#25D366;color:#fff;border:none;font-size:.95rem;font-weight:800;
+    padding:18px 36px;border-radius:4px;cursor:pointer;letter-spacing:.08em;text-transform:uppercase;
+    box-shadow:0 4px 0 rgba(0,0,0,.08);
+  }
+  .btn-whats:hover{filter:brightness(1.05);}
 
-  /* ===== Botones grandes inferiores ===== */
-  .nav-inferior{
-    position:fixed;bottom:0;left:0;right:0;background:var(--verde-marco);
-    padding:16px 5vw;display:flex;gap:20px;justify-content:center;
-    border-top:4px solid var(--verde-oscuro);z-index:900;
+  /* ===== Pie de página ===== */
+  footer.pie{
+    background:var(--primary-container);color:var(--on-primary);margin-top:auto;
+    border-radius:26px 26px 0 0;padding:30px 5vw;
   }
-  .btn-grande{
-    flex:1;max-width:420px;background:var(--verde-pastel);color:var(--verde-oscuro);
-    border:none;border-radius:26px;padding:20px 10px;font-size:1.35rem;font-weight:800;
-    letter-spacing:2px;cursor:pointer;transition:background .15s ease, transform .1s ease;
-    box-shadow:0 4px 10px rgba(0,0,0,.25);
+  .pie-int{
+    max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:22px;
+    align-items:center;justify-content:space-between;
   }
-  .btn-grande:hover{background:var(--verde-pastel-hover);transform:translateY(-2px);}
-  .btn-grande.activo{outline:4px solid var(--verde-pastel-hover);}
+  .pie-marca .n{font-weight:800;font-size:1.25rem;letter-spacing:1px;}
+  .pie-marca .m{font-size:.65rem;letter-spacing:.25em;color:var(--on-primary-container);text-transform:uppercase;}
+  .pie-links{display:flex;gap:26px;flex-wrap:wrap;}
+  .pie-links button{
+    background:none;border:none;color:var(--on-primary-container);font-size:.78rem;font-weight:700;
+    letter-spacing:.05em;cursor:pointer;text-transform:uppercase;padding:4px 0;
+  }
+  .pie-links button:hover,.pie-links button.activo{color:var(--secondary-fixed);}
+  .pie-copy{font-size:.8rem;color:var(--on-primary-container);opacity:.75;}
+
+  /* Botón flotante de WhatsApp */
+  .fab-whats{
+    position:fixed;bottom:26px;right:26px;z-index:940;
+    background:#25D366;color:#fff;border:none;border-radius:50%;width:58px;height:58px;
+    box-shadow:0 8px 22px rgba(0,0,0,.3);cursor:pointer;font-size:1.6rem;
+    display:flex;align-items:center;justify-content:center;transition:transform .15s ease;
+  }
+  .fab-whats:hover{transform:scale(1.1);}
 
   .toast{
-    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);
-    background:var(--verde-marco);color:#fff;padding:14px 26px;border-radius:12px;
-    font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:transform .3s ease;z-index:999;
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-90px);
+    background:var(--primary);color:#fff;padding:14px 26px;border-radius:4px;
+    font-weight:700;font-size:.88rem;box-shadow:0 6px 18px rgba(0,0,0,.3);transition:transform .3s ease;z-index:999;
   }
   .toast.mostrar{transform:translateX(-50%) translateY(0);}
 
@@ -234,7 +434,7 @@
   .overlay-pdf{
     position:fixed;inset:0;background:rgba(255,255,255,.97);z-index:9990;
     display:flex;align-items:center;justify-content:center;
-    font-weight:700;color:var(--verde-marco);font-size:1.3rem;
+    font-weight:700;color:var(--primary);font-size:1.3rem;
   }
 
   /* ================================================================
@@ -345,20 +545,27 @@
         Tenemos Block en distintas presentaciones, de concreto para proyectos residenciales,
         comerciales e industriales, especiales para muros, bardas y construcción estructural.
       </p>
-      <p class="intro" style="margin-top:14px;">
-        Nuestro producto cuenta con procesos de control de calidad durante todas las etapas de
-        fabricación, cumpliendo con la norma <b>NMX-C-404-ONNCCE-2012</b> para piezas de
-        mampostería estructural.
+      <p class="norma">
+        <b>NMX-C-404-ONNCCE-2012</b> Cumplimos con la norma para piezas de mampostería
+        estructural, con control de calidad durante todas las etapas de fabricación.
       </p>
 
-      <div class="calidad">
-        <h3>El producto cuenta con:</h3>
-        <ul>
-          <li>Pruebas de resistencia a la compresión para validar desempeño estructural.</li>
-          <li>Control de absorción y apariencia para mantener consistencia entre lotes.</li>
-          <li>Revisión de granulometrías para garantizar mezclas uniformes y de alta calidad.</li>
-          <li>Inspección continua del proceso antes de entrega a obra.</li>
-        </ul>
+      <div class="bento">
+        <div class="calidad">
+          <h3>El producto cuenta con:</h3>
+          <ul>
+            <li><b>Resistencia certificada</b>Pruebas de resistencia a la compresión para validar desempeño estructural.</li>
+            <li><b>Control de absorción</b>Control de absorción y apariencia para mantener consistencia entre lotes.</li>
+            <li><b>Mezclas uniformes</b>Revisión de granulometrías para garantizar mezclas uniformes y de alta calidad.</li>
+            <li><b>Inspección continua</b>Inspección continua del proceso antes de entrega a obra.</li>
+          </ul>
+        </div>
+        <div class="ayuda-card">
+          <div class="icono">🎧</div>
+          <h4>¿Necesitas ayuda?</h4>
+          <p>Nuestros asesores están listos para ayudarte a calcular tu pedido.</p>
+          <button onclick="solicitarInformacion()">Hablar con asesor</button>
+        </div>
       </div>
 
       <h3 class="titulo-proceso">Proceso de compra</h3>
@@ -377,7 +584,7 @@
           <p>Coordinamos el día y horario de tu entrega.</p></div>
       </div>
 
-      <p class="leyenda-min" style="max-width:720px;margin:26px auto 0;text-align:center;">
+      <p class="leyenda-min" style="display:block;max-width:720px;margin:30px auto 0;text-align:center;">
         Contamos con servicio a domicilio a partir de <b>1,500 piezas (#5 y #6)</b> /
         <b>1,050 piezas (#8)</b>, ó recoge tu producto en fábrica.
       </p>
@@ -385,7 +592,7 @@
 
     <!-- ============ 1. PRODUCTOS ============ -->
     <section id="vista-productos" class="vista">
-      <h1 class="titulo">Selecciona el producto</h1>
+      <h1 class="titulo" style="font-size:clamp(1.5rem,3vw,2rem);letter-spacing:.12em;color:var(--primary);">Selecciona el producto</h1>
       <div class="subrayado"></div>
       <p class="intro">Elige un block para ver sus especificaciones y cotizar.</p>
       <div class="grid-productos" id="gridProductos"></div>
@@ -399,101 +606,124 @@
 
     <!-- ============ 2. COTIZADOR ============ -->
     <section id="vista-cotizador" class="vista">
-      <div class="panel">
-        <h1 class="titulo" style="font-size:1.6rem;">Cotizador</h1>
-        <div class="subrayado"></div>
-
-        <h3 class="seccion-form">Ingresa datos:</h3>
-        <div class="grid-direccion">
-          <div class="campo"><label>Nombre *</label><input id="cliNombre" placeholder="Ej. Juan Pérez"></div>
-          <div class="campo"><label>Número de contacto *</label><input id="cliTelefono" placeholder="Ej. 81 1234 5678"></div>
-        </div>
-
-        <h3 class="seccion-form">Tipo de entrega</h3>
-        <div class="grupo-radios" id="grupoEntrega">
-          <label class="radio-caja seleccionada">
-            <input type="radio" name="entrega" value="ocurre" checked onchange="cambioEntrega()">
-            <span>
-              <span class="titulo-radio">🏭 Ocurre (recoger en sitio)</span>
-              <span class="desc-radio">Recoges tu material en planta:<br>C. del Molino 123, Privadas de Santa Catarina 1er Sector, Santa Catarina, N.L.</span>
-            </span>
-          </label>
-          <label class="radio-caja">
-            <input type="radio" name="entrega" value="domicilio" onchange="cambioEntrega()">
-            <span>
-              <span class="titulo-radio">🚚 Entrega a domicilio</span>
-              <span class="desc-radio">Calculamos la distancia desde nuestra planta y asignamos la tarifa por zona (hasta 70 km).
-                Pedido mínimo: 1,500 piezas (Block #5 y #6) · 1,050 piezas (Block #8).</span>
-            </span>
-          </label>
-        </div>
-
-        <h3 class="seccion-form">Selecciona el producto</h3>
-        <div class="campo">
-          <select id="selProducto" onchange="cambioProducto()"></select>
-        </div>
-        <div id="previewProducto" style="text-align:center;margin:6px 0 14px;"></div>
-
-        <h3 class="seccion-form">Cantidad de piezas</h3>
-        <div class="campo">
-          <input type="number" id="inpCantidad" min="1" value="1500" style="max-width:280px;" onchange="pintarConfirmacionZona()">
-        </div>
-        <p class="leyenda-min" id="leyendaMinimo"></p>
-
-        <label class="check-caja verde">
-          <input type="checkbox" id="chkFactura" onchange="pintarConfirmacionZona()">
-          <span><b>Requiero factura</b> — la cotización se calcula con el precio de facturado + IVA (16%).</span>
-        </label>
-
-        <div id="bloqueDireccion" style="display:none;">
-          <h3 class="seccion-form">Dirección de entrega</h3>
-          <div class="grid-direccion">
-            <div class="campo" style="grid-column:1 / -1;"><label>Calle *</label><input id="dirCalle" placeholder="Ej. C. del Molino"></div>
-            <div class="campo"><label>Número *</label><input id="dirNumero" placeholder="Ej. 123"></div>
-            <div class="campo"><label>Colonia *</label><input id="dirColonia" placeholder="Ej. Privadas de Santa Catarina"></div>
-            <div class="campo"><label>Municipio *</label><input id="dirMunicipio" placeholder="Ej. Santa Catarina"></div>
-            <div class="campo"><label>Estado *</label><input id="dirEstado" placeholder="Ej. Nuevo León"></div>
-            <div class="campo"><label>Código postal *</label><input id="dirCP" placeholder="Ej. 66367" maxlength="5"></div>
+      <div class="layout-cotizador">
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <h1 class="titulo" style="font-size:1.9rem;text-align:left;letter-spacing:-0.01em;color:var(--primary);">Cotizador</h1>
+            <button class="volver" style="margin:0;" onclick="mostrarVista('productos')">‹ Regresar a productos</button>
           </div>
-          <button class="btn-verde" id="btnUbicar" onclick="ubicarDireccion()">📍 Ubicar en el mapa y calcular tarifa</button>
-          <div id="mapa"></div>
-          <p class="nota-mapa" id="notaMapa" style="display:none;">
-            Arrastra el punto naranja para ajustar la ubicación exacta — la dirección y la tarifa se recalculan.</p>
+          <div class="subrayado" style="margin:14px 0 8px;"></div>
+
+          <h3 class="seccion-form">01 · Datos de contacto</h3>
+          <div class="grid-direccion">
+            <div class="campo"><label>Nombre *</label><input id="cliNombre" placeholder="Ej. Juan Pérez"></div>
+            <div class="campo"><label>Número de contacto *</label><input id="cliTelefono" placeholder="Ej. 81 1234 5678"></div>
+          </div>
+
+          <h3 class="seccion-form">02 · Tipo de entrega</h3>
+          <div class="grupo-radios" id="grupoEntrega">
+            <label class="radio-caja seleccionada">
+              <input type="radio" name="entrega" value="ocurre" checked onchange="cambioEntrega()">
+              <span>
+                <span class="titulo-radio">🏭 Ocurre (recoger en sitio)</span>
+                <span class="desc-radio">Recoges tu material en planta:<br>C. del Molino 123, Privadas de Santa Catarina 1er Sector, Santa Catarina, N.L.</span>
+              </span>
+            </label>
+            <label class="radio-caja">
+              <input type="radio" name="entrega" value="domicilio" onchange="cambioEntrega()">
+              <span>
+                <span class="titulo-radio">🚚 Entrega a domicilio</span>
+                <span class="desc-radio">Calculamos la distancia desde nuestra planta y asignamos la tarifa por zona (hasta 70 km).
+                  Pedido mínimo: 1,500 piezas (Block #5 y #6) · 1,050 piezas (Block #8).</span>
+              </span>
+            </label>
+          </div>
+
+          <h3 class="seccion-form">03 · Configuración de producto</h3>
+          <div style="background:var(--surface-low);border:1px solid var(--outline-variant);padding:20px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
+            <div>
+              <div class="campo">
+                <label>Selecciona el producto</label>
+                <select id="selProducto" onchange="cambioProducto()"></select>
+              </div>
+              <div class="campo">
+                <label>Cantidad de piezas</label>
+                <input type="number" id="inpCantidad" min="1" value="1500" style="max-width:200px;" onchange="pintarConfirmacionZona()">
+              </div>
+              <p class="leyenda-min" id="leyendaMinimo" style="margin-bottom:0;"></p>
+            </div>
+            <div id="previewProducto" style="background:var(--surface);border:1px solid var(--outline-variant);padding:14px;max-width:190px;"></div>
+          </div>
+
+          <label class="check-caja verde" style="margin-top:16px;">
+            <input type="checkbox" id="chkFactura" onchange="pintarConfirmacionZona()">
+            <span><b>Requiero factura</b> — la cotización se calcula con el precio de facturado + IVA (16%).</span>
+          </label>
+
+          <div id="bloqueDireccion" style="display:none;">
+            <h3 class="seccion-form">04 · Dirección de entrega</h3>
+            <div class="grid-direccion">
+              <div class="campo" style="grid-column:1 / -1;"><label>Calle *</label><input id="dirCalle" placeholder="Ej. C. del Molino"></div>
+              <div class="campo"><label>Número *</label><input id="dirNumero" placeholder="Ej. 123"></div>
+              <div class="campo"><label>Colonia *</label><input id="dirColonia" placeholder="Ej. Privadas de Santa Catarina"></div>
+              <div class="campo"><label>Municipio *</label><input id="dirMunicipio" placeholder="Ej. Santa Catarina"></div>
+              <div class="campo"><label>Estado *</label><input id="dirEstado" placeholder="Ej. Nuevo León"></div>
+              <div class="campo"><label>Código postal *</label><input id="dirCP" placeholder="Ej. 66367" maxlength="5"></div>
+            </div>
+            <button class="btn-verde" id="btnUbicar" onclick="ubicarDireccion()">📍 Ubicar en el mapa y calcular tarifa</button>
+            <div id="mapa"></div>
+            <p class="nota-mapa" id="notaMapa" style="display:none;">
+              Arrastra el punto para ajustar la ubicación exacta — la dirección y la tarifa se recalculan.</p>
+          </div>
+
+          <h3 class="seccion-form" id="tituloProgramacion">05 · Programación y logística</h3>
+          <label class="check-caja">
+            <input type="checkbox" id="chkUrgente" onchange="cambioUrgente()">
+            <span><b>Pedido urgente</b> — entrega antes de la anticipación normal de
+              <span id="lblAnticipacion"></span> días, con cargo extra de <b id="lblTarifaUrgente"></b>.</span>
+          </label>
+          <div class="campo" style="margin-top:12px;">
+            <label>Fecha deseada de entrega (lunes a sábado) *</label>
+            <input type="date" id="inpFecha" onchange="cambioFecha()">
+            <p class="nota-zona" id="notaFecha" style="margin-top:6px;"></p>
+          </div>
+          <div id="bloqueHorario" style="display:none;">
+            <label style="display:block;font-weight:700;font-size:.8rem;margin-bottom:8px;">Horario de entrega *</label>
+            <div class="grupo-radios" id="grupoHorario"></div>
+          </div>
+
+          <div id="resultadoZona"></div>
         </div>
 
-        <h3 class="seccion-form">Fecha deseada de entrega</h3>
-        <label class="check-caja">
-          <input type="checkbox" id="chkUrgente" onchange="cambioUrgente()">
-          <span><b>Pedido urgente</b> — entrega antes de la anticipación normal de
-            <span id="lblAnticipacion"></span> días, con cargo extra de <b id="lblTarifaUrgente"></b>.</span>
-        </label>
-        <div class="campo" style="margin-top:12px;">
-          <label>Selecciona el día (entregas de lunes a sábado) *</label>
-          <input type="date" id="inpFecha" onchange="cambioFecha()">
-          <p class="nota-zona" id="notaFecha" style="margin-top:6px;"></p>
-        </div>
-        <div id="bloqueHorario" style="display:none;">
-          <label style="display:block;font-weight:700;font-size:.88rem;margin-bottom:8px;">Horario de entrega *</label>
-          <div class="grupo-radios" id="grupoHorario"></div>
-        </div>
-
-        <div id="resultadoZona"></div>
-
-        <div class="acciones">
-          <button class="btn-verde" onclick="mostrarVista('productos')">‹ Regresar a productos</button>
-          <button class="btn-naranja" onclick="generarCotizacion()">Cotizar ›</button>
-        </div>
+        <aside class="aside-cotizador">
+          <div class="card-estimacion">
+            <h3>RESUMEN DE ESTIMACIÓN</h3>
+            <div id="resumenEstimacion"></div>
+            <button class="btn-cotizar-ahora" onclick="generarCotizacion()">Cotizar ahora</button>
+            <div class="confianza">
+              <span>✔ Precios oficiales por zona de entrega</span>
+              <span>🎧 Asesoría personalizada incluida</span>
+            </div>
+          </div>
+          <div class="card-ayuda-mini">
+            <div class="circ">?</div>
+            <div>
+              <b>¿Necesitas ayuda?</b>
+              <small>WhatsApp: <strong>+52 8116596423</strong></small>
+            </div>
+          </div>
+        </aside>
       </div>
     </section>
 
     <!-- ============ 3. RESUMEN ============ -->
     <section id="vista-resumen" class="vista">
-      <div class="panel" id="panelResumen"></div>
+      <div class="panel" id="panelResumen" style="max-width:960px;margin:0 auto;"></div>
     </section>
 
     <!-- ============ FICHAS TÉCNICAS ============ -->
     <section id="vista-fichas" class="vista">
-      <h1 class="titulo" style="font-size:1.6rem;">Fichas técnicas y pruebas de resistencia</h1>
+      <h1 class="titulo" style="font-size:clamp(1.4rem,3vw,1.9rem);letter-spacing:.06em;color:var(--primary);">Fichas técnicas y pruebas de resistencia</h1>
       <div class="subrayado"></div>
       <p class="intro">Consulta la documentación técnica de nuestros productos.</p>
       <div class="grid-fichas">
@@ -510,11 +740,10 @@
 
     <!-- ============ CONTACTO ============ -->
     <section id="vista-contacto" class="vista">
-      <div class="panel" style="text-align:center;">
-        <h1 class="titulo" style="font-size:1.5rem;">Contacto</h1>
+      <div class="panel" style="text-align:center;max-width:760px;margin:0 auto;">
+        <h1 class="titulo" style="font-size:1.8rem;color:var(--primary);">Contacto</h1>
         <div class="subrayado"></div>
-        <button class="btn-verde" style="background:#25D366;font-size:1.15rem;padding:18px 34px;border-radius:14px;"
-          onclick="solicitarInformacion()">📱 Solicitar información por WhatsApp</button>
+        <button class="btn-whats" onclick="solicitarInformacion()">📱 Solicitar información por WhatsApp</button>
         <p class="contacto-datos" style="margin:26px 0 6px;">
           <b>🕗 Horario:</b> Lunes a Viernes 8:00–18:00 · Sábado 8:00–13:00
         </p>
@@ -523,12 +752,26 @@
 
   </main>
 
-  <nav class="nav-inferior">
-    <button class="btn-grande" id="btnProductos" onclick="mostrarVista('productos')">Productos</button>
-    <button class="btn-grande" id="btnContacto" onclick="mostrarVista('contacto')">Contacto</button>
-  </nav>
+  <footer class="pie">
+    <div class="pie-int">
+      <div class="pie-marca">
+        <div class="n">BLOCKSTORE</div>
+        <div class="m">Monterrey · Tu asistente de compra</div>
+      </div>
+      <div class="pie-links">
+        <button id="btnProductos" onclick="mostrarVista('productos')">Productos</button>
+        <button id="btnContacto" onclick="mostrarVista('contacto')">Contacto</button>
+        <button onclick="mostrarVista('fichas')">Fichas técnicas</button>
+      </div>
+      <p class="pie-copy">© 2026 BlockStore Monterrey. Todos los derechos reservados.</p>
+    </div>
+  </footer>
 
 </div>
+
+<button class="fab-whats" title="Solicitar información por WhatsApp" onclick="solicitarInformacion()">
+  <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.744-2.834-2.527-2.921-2.641-.087-.114-.71-.944-.71-1.809s.448-1.292.607-1.465c.159-.173.346-.217.462-.217l.332.005c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.101-.177.211-.077.382.1.172.443.73.952 1.185.656.587 1.21.769 1.383.855.172.086.274.072.376-.043.101-.116.433-.506.548-.68.116-.173.231-.144.39-.087.158.058 1.011.477 1.184.564.173.087.289.129.332.202.043.073.043.419-.101.824z"/></svg>
+</button>
 
 <div class="toast" id="toast">✔</div>
 
@@ -561,7 +804,7 @@ const TARIFA_URGENTE = 350.00;   /* ⚠ EDITAR: cargo extra por pedido urgente *
 const HORARIOS = ["7:00 am - 12:00 pm", "12:00 pm - 6:00 pm"];
 
 /* WhatsApp del negocio: recibe las peticiones de cotización de los clientes */
-const WHATSAPP_NEGOCIO = "528180120847";   /* ⚠ EDITAR si cambia el número */
+const WHATSAPP_NEGOCIO = "528116596423";   /* ⚠ EDITAR si cambia el número */
 
 /* Supabase: cada cotización generada se guarda en la tabla cotizaciones_block
    (la llave publishable solo permite insertar, nunca leer datos de clientes) */
@@ -670,7 +913,7 @@ function svgBlock(huecos, alto=200){
 function imgProducto(clave, huecos, alto=200){
   const src = IMAGENES[clave];
   if(!src) return svgBlock(huecos, alto);
-  return `<img src="${src}" alt="Block de ${huecos} huecos" style="max-width:100%;max-height:${alto}px;object-fit:contain;border-radius:8px;">`;
+  return `<img src="${src}" alt="Block de ${huecos} huecos" style="max-width:100%;max-height:${alto}px;object-fit:contain;">`;
 }
 
 /* ================= Estado ================= */
@@ -716,14 +959,15 @@ function mostrarVista(nombre){
 function pintarCatalogo(){
   document.getElementById("gridProductos").innerHTML = PRODUCTOS.map(p => `
     <div class="tarjeta" onclick="verDetalle('${p.id}')">
-      ${imgProducto(p.imagenes[0].clave, p.imagenes[0].huecos)}
+      <div class="marco-img">${imgProducto(p.imagenes[0].clave, p.imagenes[0].huecos)}</div>
       <h3>${p.nombre}</h3>
       <div class="specs">
-        <b>Medidas:</b> ${p.medida}<br>
-        <b>Peso:</b> ${p.peso}
+        <div class="fila"><b>Medidas</b> <span>${p.medida}</span></div>
+        <div class="fila"><b>Peso</b> <span>${p.peso}</span></div>
       </div>
       <span class="config">${p.presentacion.replace(".","")}</span>
-      <div class="desde">Desde ${fmt(p.precios.ocurre.rem)} <small style="font-size:.7rem;color:var(--gris);">por pieza en Ocurre</small></div>
+      <div class="desde">Desde ${fmt(p.precios.ocurre.rem)} <small>por pieza en Ocurre</small></div>
+      <button class="btn-ver">Ver detalles y cotizar</button>
     </div>`).join("");
 }
 
@@ -768,7 +1012,7 @@ function cambioProducto(){
   const o = opcionActual();
   document.getElementById("previewProducto").innerHTML = imgProducto(o.clave, o.huecos, 130);
   document.getElementById("leyendaMinimo").textContent =
-    `Aplica envío a domicilio a partir de ${fmtEntero(o.min)} piezas (${o.etiqueta}).`;
+    `✔ Aplica envío a domicilio a partir de ${fmtEntero(o.min)} piezas (${o.etiqueta}).`;
   const inp = document.getElementById("inpCantidad");
   if(cantidadPiezas() < o.min) inp.value = o.min;
   pintarConfirmacionZona();
@@ -795,6 +1039,7 @@ function cambioEntrega(){
     cotizacion = {tipo:"domicilio", zona:null, nombreZona:null, km:null, direccionDestino:null};
     if(destino) pintarConfirmacionZona();
   }
+  actualizarEstimacion();
 }
 
 /* ---------- Dirección, mapa y distancia ---------- */
@@ -914,6 +1159,7 @@ async function calcularDistanciaYZona(){
     res.innerHTML = `<b>Fuera de cobertura.</b> La ubicación está a <b>${km} km</b> de la planta
       y nuestra entrega llega hasta ${KM_MAXIMO} km.<br>Contáctanos para cotizar un flete especial,
       o elige <b>Ocurre</b> para recoger en sitio.`;
+    actualizarEstimacion();
     return;
   }
   const z = ZONAS.find(z => km >= z.min && km < z.max) || ZONAS[ZONAS.length-1];
@@ -923,6 +1169,7 @@ async function calcularDistanciaYZona(){
 
 /* Cuadro de confirmación: dirección + km + tarifa (+ precio según producto) */
 function pintarConfirmacionZona(){
+  actualizarEstimacion();
   const res = document.getElementById("resultadoZona");
   if(cotizacion.tipo === "domicilio"){
     if(!cotizacion.zona){ return; }
@@ -938,6 +1185,51 @@ function pintarConfirmacionZona(){
   }else if(document.getElementById("resultadoZona").innerHTML !== ""){
     res.innerHTML = "";
   }
+}
+
+/* Resumen de estimación en vivo (tarjeta lateral) — solo despliegue,
+   usa los mismos datos y reglas que generarCotizacion */
+function actualizarEstimacion(){
+  const cont = document.getElementById("resumenEstimacion");
+  if(!cont) return;
+  const o = opcionActual();
+  if(!o){ cont.innerHTML = ""; return; }
+  const cantidad = cantidadPiezas();
+  const factura = conFactura();
+  const urgente = esUrgente();
+  const domicilio = tipoEntrega() === "domicilio";
+
+  if(domicilio && !cotizacion.zona){
+    cont.innerHTML = `
+      <div class="fila-est"><span>${o.etiqueta} (${fmtEntero(cantidad)} pzas)</span><span>—</span></div>
+      <div class="fila-est"><span>Zona de entrega</span><span class="verde">Por asignar</span></div>
+      <div class="total-est">
+        <div class="eti">Total estimado</div>
+        <div class="monto">—</div>
+        <span class="nota-est">Ubica tu dirección en el mapa para asignar la tarifa por zona.</span>
+      </div>`;
+    return;
+  }
+  const tf = factura ? "fact" : "rem";
+  const zonaClave = domicilio ? cotizacion.zona : "ocurre";
+  const pu = o.precios[zonaClave][tf];
+  const importe = pu * cantidad;
+  const cargoUrgente = urgente ? TARIFA_URGENTE : 0;
+  const subtotal = importe + cargoUrgente;
+  const iva = factura ? subtotal * IVA : 0;
+  const total = subtotal + iva;
+
+  cont.innerHTML = `
+    <div class="fila-est"><span>${o.etiqueta} (${fmtEntero(cantidad)} pzas)</span><span>${fmt(importe)}</span></div>
+    <div class="fila-est"><span>Entrega</span>
+      <span class="verde">${domicilio ? cotizacion.nombreZona : "Ocurre (en planta)"}</span></div>
+    ${cargoUrgente ? `<div class="fila-est"><span>Pedido urgente</span><span>${fmt(cargoUrgente)}</span></div>` : ""}
+    ${factura ? `<div class="fila-est"><span>IVA (16%)</span><span>${fmt(iva)}</span></div>` : ""}
+    <div class="total-est">
+      <div class="eti">Total estimado</div>
+      <div class="monto">${fmt(total)}<span class="mxn">MXN</span></div>
+      <span class="nota-est">* Sujeto a validación de disponibilidad.</span>
+    </div>`;
 }
 
 function haversineKm(lat1, lon1, lat2, lon2){
@@ -979,7 +1271,7 @@ function actualizarMinimoFecha(){
 function formatearFecha(d){
   return d.toLocaleDateString("es-MX", {weekday:"long", day:"numeric", month:"long", year:"numeric"});
 }
-function cambioUrgente(){ actualizarMinimoFecha(); }
+function cambioUrgente(){ actualizarMinimoFecha(); actualizarEstimacion(); }
 
 function cambioFecha(){
   const inp = document.getElementById("inpFecha");
@@ -1113,9 +1405,9 @@ function pintarResumen(){
        <div class="total-linea" style="font-size:1rem;">IVA (16%): <b style="font-size:1.1rem;">${fmt(c.iva)}</b></div>` : "";
 
   document.getElementById("panelResumen").innerHTML = `
-    <h1 class="titulo" style="font-size:1.5rem;">Resumen de cotización</h1>
+    <h1 class="titulo" style="font-size:1.8rem;color:var(--primary);">Resumen de cotización</h1>
     <div class="subrayado"></div>
-    <p style="text-align:center;color:var(--gris);">Folio <b>${c.folio}</b> · ${c.factura ? "Cotización facturada" : "Cotización con remisión"}</p>
+    <p style="text-align:center;color:var(--on-surface-variant);">Folio <b>${c.folio}</b> · ${c.factura ? "Cotización facturada" : "Cotización con remisión"}</p>
     <table class="resumen">
       <tr><th>Descripción</th><th>Cantidad</th><th>Zona</th><th>Precio unitario</th><th>Importe</th></tr>
       <tr>
@@ -1255,7 +1547,7 @@ function construirDocumento(){
     </div>
     <div class="doc-pie">
       <span>🧱 ¡GRACIAS POR SU PREFERENCIA!</span>
-      <span>BLOCKSTORE MONTERREY · 📱 ${WHATSAPP_NEGOCIO.slice(2)}</span>
+      <span>BLOCKSTORE MONTERREY · 📱 +52 ${WHATSAPP_NEGOCIO.slice(2)}</span>
     </div>`;
 }
 
@@ -1419,7 +1711,7 @@ function construirOrden(){
     </div>
     <div class="doc-pie">
       <span>Gracias por proporcionarnos todos los datos.</span>
-      <span>BLOCKSTORE MONTERREY · 📱 ${WHATSAPP_NEGOCIO.slice(2)}</span>
+      <span>BLOCKSTORE MONTERREY · 📱 +52 ${WHATSAPP_NEGOCIO.slice(2)}</span>
     </div>`;
 }
 
